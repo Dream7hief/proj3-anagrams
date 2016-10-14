@@ -10,7 +10,7 @@ This game is designed to help primary school English language learners (ELL) in 
 
 Running the Application
 You can change the number or words necessary to win by changing 
-success_at_count in CONFIGURE.py 
+success_at_count in CONFIGURE.py and vocab.html
 bash ./configure
 make run
 site can be reached at: localhost:5000
