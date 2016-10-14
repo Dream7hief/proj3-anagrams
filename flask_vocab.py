@@ -71,7 +71,7 @@ def success():
 #   a JSON request handler
 #######################
 
-@app.route("/_check", methods = ["POST"])
+@app.route("/_check")
 def check():
   """
   User has submitted the form with a word ('attempt')
@@ -84,7 +84,7 @@ def check():
   app.logger.debug("Entering check")
 
   ## The data we need, from form and from cookie
-  text = request.form["attempt"]
+  text = request.args.get("text", type=str)
   jumble = flask.session["jumble"]
   matches = flask.session.get("matches", []) # Default to empty list
 
@@ -97,27 +97,13 @@ def check():
     ## Cool, they found a new word
     matches.append(text)
     flask.session["matches"] = matches
-  elif text in matches:
-    flask.flash("You already found {}".format(text))
-  elif not matched:
-    flask.flash("{} isn't in the list of words".format(text))
-  elif not in_jumble:
-    flask.flash('"{}" can\'t be made from the letters {}'.format(text,jumble))
-  else:
-    app.logger.debug("This case shouldn't happen!")
-    assert False  # Raises AssertionError
-
-  ## Choose page:  Solved enough, or keep going? 
-  if len(matches) >= flask.session["target_count"]:
-    return flask.redirect(url_for("success"))
-  else:
-    return flask.redirect(url_for("keep_going"))
-
+    
+    return jsonify(result=flask.session["matches"]);
+  
 ###############
 # AJAX request handlers 
 #   These return JSON, rather than rendering pages. 
 ###############
-
 @app.route("/_example")
 def example():
   """
@@ -146,18 +132,18 @@ def format_filt( something ):
 @app.errorhandler(404)
 def error_404(e):
   app.logger.warning("++ 404 error: {}".format(e))
-  return render_template('404.html'), 404
+  return flask.render_template('404.html'), 404
 
 @app.errorhandler(500)
 def error_500(e):
    app.logger.warning("++ 500 error: {}".format(e))
    assert app.debug == False #  I want to invoke the debugger
-   return render_template('500.html'), 500
+   return flask.render_template('500.html'), 500
 
 @app.errorhandler(403)
 def error_403(e):
   app.logger.warning("++ 403 error: {}".format(e))
-  return render_template('403.html'), 403
+  return flask.render_template('403.html'), 403
 
 
 
